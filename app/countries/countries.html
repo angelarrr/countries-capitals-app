@@ -9,14 +9,14 @@
 			<th>Continent</th>
 		</tr>
 	</thead>
-	<tbody>
+	<tbody ng-repeat="country in countries">
 		<tr>
-			<td>{{ }}</td>
-			<td>{{ }}</td>
-			<td>{{ }}</td>
-			<td>{{ | number }}</td>
-			<td>{{ | number }}</td>
-			<td>{{ }}</td>
+			<td>{{ country.countryName }}</td>
+			<td>{{ country.countryCode }}</td>
+			<td>{{ country.capital }}</td>
+			<td>{{ country.areaInSqKm | number }}</td>
+			<td>{{ country.population | number }}</td>
+			<td>{{ country.continentName }}</td>
 		</tr>
 	</tbody>
 </table>

@@ -25,7 +25,7 @@ app.config(['$routeProvider', function($routeProvider){
 	});
 }])
 
-app.factory('countryFactory', [$'http', function($http){
+app.factory('countryFactory', function($http, $q){
 	
 	var apiURL = "http://api.geonames.org/";
 	var username = "angelarrr";
@@ -143,7 +143,7 @@ app.factory('countryFactory', [$'http', function($http){
 	}
 
 	return countryData;
-}])
+})
 
 app.controller('listCtrl', ['$scope', 'countryFactory', function($scope, countryFactory) {
 	countryFactory.getCountries().then(function(countries){
@@ -152,7 +152,28 @@ app.controller('listCtrl', ['$scope', 'countryFactory', function($scope, country
 }])
 
 app.controller('detailCtrl', ['$scope', '$q', 'storeCountries', function($scope, $q, storeCountries) {
+	// from resolved route
+	$scope.country = country;
+	$scope.countryCode = countryCode;
 	
+	var loadCountry = function() {
+		return countryFactory.getCountry(countryCode, country).then(function(country){
+			$scope.countryPop = country.population;
+			$scope.countryArea = country.areaInSqKm;
+			$scope.countryCapital = country.capital;
+		});
+	},
+	loadCapital = function() {
+		return countryFactory.getCapital(countryCode).then(function(capital){
+			$scope.capitalPop = capital.population;
+		});
+	},
+	loadNeighbors = function() {
+		return countryFactory.getNeighbors(countryCode).then(function(neighbors){
+			$scope.neighbors = neighbors;
+			$scope.neighborsCount = neighbors.length;
+		});
+	};
 }])
 
 // http://api.geonames.org/countryInfo?username=angelarrr

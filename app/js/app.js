@@ -1,5 +1,33 @@
 var app = angular.module('cncApp', ['ngRoute', 'ngAnimate']);
 
+var app = angular.module('cncApp', ['ngRoute', 
+	'ngAnimate']);
+
+app.constant('CNC_API_CONFIG', {
+	BASE: 'http://api.geonames.org',
+	USER: 'angelarrr'
+	METHOD: 'JSONP',
+	CALLBACK: 'JSON_CALLBACK',
+	COUNTRY_EP: '/countryInfoJSON',
+	CAPITAL_EP: 'searchJSON',
+	NEIGHBORS_EP: '/neighboursJSON',
+	TIMEZONE_EP: '/timezoneJSON'
+})
+
+app.run(function($rootScope, $location, $timeout) {
+	$rootScope.$on('$routeChangeError', function() {
+		$location.path("/");
+	});
+	$rootScope.$on('$routeChangeStart', function() {
+		$rootScope.isLoading = true;
+	});
+	$rootScope.$on('$routeChangeSuccess', function() {
+		$timeout(function() {
+			$rootScope.isLoading = false;
+		}, 2000);
+	});
+})
+
 app.config(['$routeProvider', function($routeProvider){
 	$routeProvider.when('/', {
 		templateUrl : './home/home.html',
@@ -25,124 +53,76 @@ app.config(['$routeProvider', function($routeProvider){
 	});
 }])
 
-app.factory('countryFactory', function($http, $q){
-	
-	var apiURL = "http://api.geonames.org/";
-	var username = "angelarrr";
-	var countryData = {};
+app.factory('getCountries', function($http, $q, CNC_API_CONFIG){
+	return function(endpoint, queryParams){
+		var params = {
+			username: CNC_API_CONFIG.USER,
+			callback: CNC_API_CONFIG.CALLBACK
+		};
+		return $http({
+			method: CNC_API_CONFIG.METHOD,
+			url: CNC_API_CONFIG.BASE + endpoint,
+			params: angular.extend(params, queryParams),
+			cache: true
+		});
+	};
+})
 
-	countryData = {
-		getCountries: function() {
-				var defer = $q.defer();
-				var url = apiURL + "countryInfoJSON";
-				var request = {
-					callback: 'JSON_CALLBACK',
-					username: username,
-			};
+app.factory('getCountry', function($http, CNC_API_CONFIG, getCountries){
+	return function(countryCode){
+		var queryParams = {
+			country: countryCode
+		};
+		return getCountries(CNC_API_CONFIG.COUNTRY_EP, queryParams)
+			.then(function(countryDetails){
+				if(countryCode){
+					return countryDetails.data.geonames[0];
+				} else {
+					return countryDetails.data.geonames;
+				}
+		});
+	};
+})
 
-			$http({
-				method: 'JSONP',
-				url: url,
-				params: request,
-				cache: true
-			})
+app.factory('getCapital', function($http, CNC_API_CONFIG, getCountries){
+	return function(countryCode){
+		var queryParams = {
+			country: countryCode,
+			isNameRequired: true,
+			formatted: true,
+			maxRows: 1,
+		};
 
-			.success(function(data, status) {
-				defer.resolve(data);
-			})
-
-			.error(function(data) {
-				defer.reject();
+		return getCountries(CNC_API_CONFIG.CAPITAL_EP, queryParams)
+			.then(function(capitalDetails){
+				return capitalDetails.data.geonames[0];
 			});
+	};
+})
 
-			return defer.promise;
-		},
-
-		getCountry: function(countryCode) {
-			var defer = $q.defer();
-			var url = apiURL + "countryInfoJSON";
-			var request = {
-				callback: 'JSON_CALLBACK',
-				country: countryCode,
-				username: username
-			};
-
-			$http({
-				method: 'JSONP',
-				url: url,
-				params: request,
-				cache: true
-			})
-
-			.success(function(data){
-				defer.resolve(data.geonames);
-			})
-
-			.error(function(data){
-				defer.reject();
+app.factory('getNeighbors', function($http, CNC_API_CONFIG, getCountries){
+	return function(countryCode){
+		var queryParams = {
+			country: countryCode
+		};
+		return getCountries(CNC_API_CONFIG.NEIGHBORS_EP, queryParams)
+			.then(function(neighbors){
+				return neighbors.data.geonames;
 			});
+	};
+})
 
-			return defer.promise;
-		},
-
-		getCapital: function(countryCode) {
-			var defer = $q.defer;
-			var url = apiURL + "searchJSON";
-			var request = {
-				callback: 'JSON_CALLBACK',
-				q: 'capital',
-				country: countryCode,
-				isNameRequired: true,
-				formatted: true,
-				maxRows: 1,
-				username: username
-			};
-
-			$http({
-				method: 'JSONP',
-				url: url,
-				params: request,
-				cache: true
-			})
-
-			.success(function(data){
-				defer.resolve(data.geonames[0]);
-			})
-
-			.error(function(data){
-				defer.reject();
+app.factory('getTimeZone', function($http, CNC_API_CONFIG, getCountries){
+	return function(latitude, longitude){
+		var queryParams = {
+			lat: latitude,
+			lng: longitude
+		};
+		return getCountries(CNC_API_CONFIG.TIMEZONE_EP, queryParams)
+			.then(function(timezone){
+				return timezone.data;
 			});
-
-			return defer.promise;
-		},
-
-		getNeighbors: function(countryCode) {
-			var defer = $q.defer;
-			var url = apiURL +  "neighboursJSON";
-			var request = {
-				callback: 'JSON_CALLBACK',
-				country: countryCode,
-				username: username
-			};
-
-			$http({
-				method: 'JSONP',
-				url: url,
-				params: request,
-				cache: true
-			})
-			.success(function(data){
-				defer.resolve(data);
-			})
-			.error(function(data){
-				defer.reject();
-			});
-
-			return defer.promise;
-		}
-	}
-
-	return countryData;
+	};
 })
 
 app.controller('listCtrl', ['$scope', 'countryFactory', function($scope, countryFactory) {

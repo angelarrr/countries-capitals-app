@@ -3,10 +3,10 @@ var app = angular.module('cncApp', ['ngRoute', 'ngAnimate']);
 app.config(['$routeProvider', function($routeProvider){
 	$routeProvider.when('/', {
 		templateUrl : './home/home.html',
-		controller : 'cncCtrl'
+		controller: "",
 	}).when('/countries', {
 		templateUrl : './countries/countries.html',
-		controller : 'listCtrl'
+		controller : 'listCtrl',
 	}).when('/countries/:country/capital', {
 		templateUrl : './country-details.html',
 		controller : 'detailsCtrl',
@@ -20,20 +20,24 @@ app.config(['$routeProvider', function($routeProvider){
 				return countryCode;
 			}
 		}
-	}).otherwise('/');
+	}).otherwise({
+		redirectTo: '/'
+	});
 }])
 
-app.factory('countryData', [$'http', function($http){
+app.factory('countryFactory', [$'http', function($http){
 	
 	var apiURL = "http://api.geonames.org/";
 	var username = "angelarrr";
+	var countryData = {};
 
-	return {
+	countryData = {
 		getCountries: function() {
-			var url = apiURL + "countryInfoJSON";
-			var request = {
-				callback: 'JSON_CALLBACK',
-				username: username,
+				var defer = $q.defer();
+				var url = apiURL + "countryInfoJSON";
+				var request = {
+					callback: 'JSON_CALLBACK',
+					username: username,
 			};
 
 			$http({
@@ -42,9 +46,20 @@ app.factory('countryData', [$'http', function($http){
 				params: request,
 				cache: true
 			})
+
+			.success(function(data, status) {
+				defer.resolve(data);
+			})
+
+			.error(function(data) {
+				defer.reject();
+			});
+
+			return defer.promise;
 		},
 
 		getCountry: function(countryCode) {
+			var defer = $q.defer();
 			var url = apiURL + "countryInfoJSON";
 			var request = {
 				callback: 'JSON_CALLBACK',
@@ -58,14 +73,26 @@ app.factory('countryData', [$'http', function($http){
 				params: request,
 				cache: true
 			})
+
+			.success(function(data){
+				defer.resolve(data.geonames);
+			})
+
+			.error(function(data){
+				defer.reject();
+			});
+
+			return defer.promise;
 		},
 
 		getCapital: function(countryCode) {
+			var defer = $q.defer;
 			var url = apiURL + "searchJSON";
 			var request = {
 				callback: 'JSON_CALLBACK',
 				q: 'capital',
 				country: countryCode,
+				isNameRequired: true,
 				formatted: true,
 				maxRows: 1,
 				username: username
@@ -77,9 +104,20 @@ app.factory('countryData', [$'http', function($http){
 				params: request,
 				cache: true
 			})
+
+			.success(function(data){
+				defer.resolve(data.geonames[0]);
+			})
+
+			.error(function(data){
+				defer.reject();
+			});
+
+			return defer.promise;
 		},
 
 		getNeighbors: function(countryCode) {
+			var defer = $q.defer;
 			var url = apiURL +  "neighboursJSON";
 			var request = {
 				callback: 'JSON_CALLBACK',
@@ -93,12 +131,28 @@ app.factory('countryData', [$'http', function($http){
 				params: request,
 				cache: true
 			})
+			.success(function(data){
+				defer.resolve(data);
+			})
+			.error(function(data){
+				defer.reject();
+			});
+
+			return defer.promise;
 		}
-	};
+	}
+
+	return countryData;
 }])
 
-app.controller('cncCtrl', function($scope) {
+app.controller('listCtrl', ['$scope', 'countryFactory', function($scope, countryFactory) {
+	countryFactory.getCountries().then(function(countries){
+		$scope.countries = countries;
+	})
+}])
 
-})
+app.controller('detailCtrl', ['$scope', '$q', 'storeCountries', function($scope, $q, storeCountries) {
+	
+}])
 
 // http://api.geonames.org/countryInfo?username=angelarrr

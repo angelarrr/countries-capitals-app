@@ -1,0 +1,106 @@
+/* styling */
+
+html, body {
+	text-align: center;
+	padding: 0;
+	margin: 0;
+	position: relative;
+	height: 100%;
+}
+
+body {
+	font-family: 'Source Sans Pro', sans-serif;
+}
+
+a {
+	color: #9EAEB3;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #242E35;
+}
+
+.animate-view-container {
+	margin: 2em;
+}
+
+header {
+	background-color: #CCDDDD;
+	color: #242E35;
+	margin: 0;
+	padding: 0.5em;
+}
+
+h1 {
+	font-weight: 700;
+	font-size: 3em;
+}
+
+h2 {
+	font-weight: 600;
+	font-size: 2em;
+}
+
+.btns {
+	padding-top: 1em;
+}
+
+/* country */
+.table-box {
+	width: 75%;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: left;
+}
+
+thead {
+	font-size: 1em;
+
+}
+
+th {
+	padding: 0.5em;
+	width: 17%;
+	font-weight: 600;
+	background-color: #9EAEB3;
+}
+
+td {
+	padding: 0.5em;
+}
+
+/* country details */
+dl {
+	padding: 0.5em;
+	width: 30%;
+	margin: 1em auto;
+  }
+
+dt {
+	float: left;
+	clear: left;
+	width: 200px;
+	text-align: right;
+	font-weight: bold;
+	color: #5B7876;
+}
+
+dt:after {
+	content: ":";
+}
+
+dd {
+	text-align: left;
+	margin: 0 0 0 210px;
+	padding: 0 0 0.25em 0;
+}
+
+.graphics {
+	margin-top: 1em;
+	margin-bottom: 2em;
+}
+
+.graphics img {
+	margin: 2em;
+}

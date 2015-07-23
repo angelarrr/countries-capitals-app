@@ -15,7 +15,7 @@
 		<dt>Timezone</dt>
 			<dd>{{ timezoneDetails.timezoneId }}</dd>
 		<dt>{{ neighbors.length }} Neighbors</dt>
-			<dd><span ng-repeat="neighbor in neighbors"><a ng-href="#/countries/{{ neighbor.countryCode }}/capital">{{  }}</a><span ng-if="!$last">, </span></span></dd>
+			<dd><span ng-repeat="neighbor in neighbors"><a ng-href="#/countries/{{ neighbor.countryCode }}/capital">{{ neighbor.name }}</a><span ng-if="!$last">, </span></span></dd>
 	</dl>
 
 	<div class="graphics">
@@ -24,8 +24,10 @@
 		<!-- map image: ?? is two letter uppercase country code -->
 		<img id='myImage' src="http://www.geonames.org/img/country/250/{{ countryCode }}.png" />
 	</div>
-
-	<a href="#/countries">Back to Countries</a>
-	<a href="#/">Home</a>
+	
+	<div class="btns">
+		<a href="#/countries"><button>Back to Countries</button></a>
+		<a href="#/"><button>Home</button></a>
+	</div>
 
 </div>

@@ -1,15 +1,12 @@
 var app = angular.module('cncApp', ['ngRoute', 'ngAnimate']);
 
-var app = angular.module('cncApp', ['ngRoute', 
-	'ngAnimate']);
-
 app.constant('CNC_API_CONFIG', {
 	BASE: 'http://api.geonames.org',
-	USER: 'angelarrr'
+	USER: 'angelarrr',
 	METHOD: 'JSONP',
 	CALLBACK: 'JSON_CALLBACK',
 	COUNTRY_EP: '/countryInfoJSON',
-	CAPITAL_EP: 'searchJSON',
+	CAPITAL_EP: '/searchJSON',
 	NEIGHBORS_EP: '/neighboursJSON',
 	TIMEZONE_EP: '/timezoneJSON'
 })
@@ -35,15 +32,11 @@ app.config(['$routeProvider', function($routeProvider){
 	}).when('/countries', {
 		templateUrl : './countries/countries.html',
 		controller : 'listCtrl',
-	}).when('/countries/:country/capital', {
-		templateUrl : './country-details.html',
+	}).when('/countries/:countryCode/capital', {
+		templateUrl : './countries/country-details.html',
 		controller : 'detailsCtrl',
 		resolve: {
-			country: function($route, $location) {
-				var country = $route.current.params.country;
-				return country;
-			},
-			countryCode: function($route, $location) {
+			countryCode: function($route) {
 				var countryCode = $route.current.params.countryCode;
 				return countryCode;
 			}
@@ -55,14 +48,15 @@ app.config(['$routeProvider', function($routeProvider){
 
 app.factory('getCountries', function($http, $q, CNC_API_CONFIG){
 	return function(endpoint, queryParams){
-		var params = {
+		var apiParams = {
 			username: CNC_API_CONFIG.USER,
 			callback: CNC_API_CONFIG.CALLBACK
 		};
 		return $http({
 			method: CNC_API_CONFIG.METHOD,
 			url: CNC_API_CONFIG.BASE + endpoint,
-			params: angular.extend(params, queryParams),
+			params: angular.extend(apiParams, queryParams),
+			timeout: 5000,
 			cache: true
 		});
 	};
@@ -88,9 +82,9 @@ app.factory('getCapital', function($http, CNC_API_CONFIG, getCountries){
 	return function(countryCode){
 		var queryParams = {
 			country: countryCode,
-			isNameRequired: true,
-			formatted: true,
-			maxRows: 1,
+			// isNameRequired: true,
+			// formatted: true,
+			// maxRows: 1,
 		};
 
 		return getCountries(CNC_API_CONFIG.CAPITAL_EP, queryParams)
@@ -119,41 +113,53 @@ app.factory('getTimeZone', function($http, CNC_API_CONFIG, getCountries){
 			lng: longitude
 		};
 		return getCountries(CNC_API_CONFIG.TIMEZONE_EP, queryParams)
-			.then(function(timezone){
-				return timezone.data;
+			.then(function(timezoneInfo){
+				return timezoneInfo.data;
 			});
 	};
 })
 
-app.controller('listCtrl', ['$scope', 'countryFactory', function($scope, countryFactory) {
-	countryFactory.getCountries().then(function(countries){
-		$scope.countries = countries;
-	})
-}])
+app.controller('listCtrl', function($scope, getCountry){
+	getCountry().then(function(result){
+		$scope.countries = result;
+	});
+})
 
-app.controller('detailCtrl', ['$scope', '$q', 'storeCountries', function($scope, $q, storeCountries) {
-	// from resolved route
-	$scope.country = country;
-	$scope.countryCode = countryCode;
-	
-	var loadCountry = function() {
-		return countryFactory.getCountry(countryCode, country).then(function(country){
-			$scope.countryPop = country.population;
-			$scope.countryArea = country.areaInSqKm;
-			$scope.countryCapital = country.capital;
-		});
-	},
-	loadCapital = function() {
-		return countryFactory.getCapital(countryCode).then(function(capital){
-			$scope.capitalPop = capital.population;
-		});
-	},
-	loadNeighbors = function() {
-		return countryFactory.getNeighbors(countryCode).then(function(neighbors){
-			$scope.neighbors = neighbors;
-			$scope.neighborsCount = neighbors.length;
+app.controller('detailsCtrl', function($scope, countryCode, getCountry, getCapital, getNeighbors, getTimeZone){
+
+	var loadCountry = function(){
+		return getCountry(countryCode).then(function(countryDetails){
+			$scope.countryDetails = countryDetails;
+			return countryDetails;
 		});
 	};
-}])
+
+	var loadCapital = function(){
+		return getCapital(countryCode).then(function(capitalDetails){
+			$scope.capitalDetails = capitalDetails;
+			return capitalDetails;
+		});
+	};
+
+	var loadNeighbors = function(){
+		return getNeighbors(countryCode).then(function(neighbors){
+			$scope.neighbors = neighbors;
+			return neighbors;
+		});
+	};
+
+	var loadTimezone = function(capitalDetails){
+		return getTimeZone(capitalDetails.lat, capitalDetails.lng).then(function(timezoneDetails){
+			$scope.timezoneDetails = timezoneDetails;
+			return timezoneDetails;
+		});
+	};
+
+	$scope.countryCode = countryCode;
+
+	loadCountry();
+	loadCapital().then(loadTimezone);
+	loadNeighbors(countryCode);
+})
 
 // http://api.geonames.org/countryInfo?username=angelarrr

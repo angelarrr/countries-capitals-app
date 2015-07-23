@@ -1,29 +1,31 @@
 <div class="details">
-	<h2>{{ countryName }}</h2>
+	<h2>{{ countryDetails.countryName }}</h2>
 	
 	<dl class="country-deets">
 		<dt>Population of Country</dt>
-			<dd>{{ }}</dd>
+			<dd>{{ countryDetails.population | number }}</dd>
 		<dt>Area</dt>
-			<dd>{{ }}</dd>
+			<dd>{{ countryDetails.areaInSqKm | number }}</dd>
 		<dt>Capital</dt>
-			<dd>{{ }}</dd>
+			<dd>{{ countryDetails.capital }}</dd>
 		<dt>Population of Capital</dt>
-			<dd>{{ }}</dd>
+			<dd>{{ capitalDetails.population | number }}</dd>
 		<dt>Continent</dt>
-			<dd>{{ }}</dd>
+			<dd>{{ countryDetails.continentName }}</dd>
 		<dt>Timezone</dt>
-			<dd>{{ }}</dd>
-		<dt>Neighbors</dt>
-			<dd>{{ }}</dd>
+			<dd>{{ timezoneDetails.timezoneId }}</dd>
+		<dt>{{ neighbors.length }} Neighbors</dt>
+			<dd><span ng-repeat="neighbor in neighbors"><a ng-href="#/countries/{{ neighbor.countryCode }}/capital">{{  }}</a><span ng-if="!$last">, </span></span></dd>
 	</dl>
 
-	<!-- flag image: ?? is two letter lowercase country code -->
-	<img src="http://www.geonames.org/flags/x/??.gif" />
-	<!-- map image: ?? is two letter uppercase country code -->
-	<img id='myImage' src="http://www.geonames.org/img/country/250/??.png" />
+	<div class="graphics">
+		<!-- flag image: ?? is two letter lowercase country code -->
+		<img src="http://www.geonames.org/flags/x/{{ countryCode.toLowerCase() }}.gif" />
+		<!-- map image: ?? is two letter uppercase country code -->
+		<img id='myImage' src="http://www.geonames.org/img/country/250/{{ countryCode }}.png" />
+	</div>
 
-	<a href="">Back to Countries</a>
-	<a href="">Home</a>
+	<a href="#/countries">Back to Countries</a>
+	<a href="#/">Home</a>
 
 </div>

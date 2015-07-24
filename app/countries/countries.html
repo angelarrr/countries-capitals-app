@@ -10,8 +10,8 @@
 				<th>Continent</th>
 			</tr>
 		</thead>
-		<tbody ng-repeat="country in countries">
-			<tr>
+		<tbody>
+			<tr ng-repeat="country in countries">
 				<td><a ng-href="#/countries/{{country.countryCode}}/capital">{{ country.countryName }}</a></td>
 				<td>{{ country.countryCode }}</td>
 				<td>{{ country.capital }}</td>

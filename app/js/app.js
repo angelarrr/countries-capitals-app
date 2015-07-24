@@ -158,7 +158,7 @@ app.controller('detailsCtrl', function($scope, countryCode, getCountry, getCapit
 	$scope.countryCode = countryCode;
 
 	loadCountry();
-	loadCapital().then(loadTimezone);
+	loadCapital().then(loadTimezone); // promise chain
 	loadNeighbors(countryCode);
 })
 

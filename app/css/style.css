@@ -53,6 +53,8 @@ h2 {
 	margin-right: auto;
 	margin-left: auto;
 	text-align: left;
+	height: 25em;
+	overflow: scroll;
 }
 
 thead {

@@ -43,4 +43,18 @@ describe("appFactory", function(){
 				});
 			}));
 	});
+
+	describe('getNeighbors', function(){
+		it('should successfully request neighbors data',
+			inject(function($httpBackend, getNeighbors){
+				var response = 'an array of neighbors'
+				$httpBackend.expectGET('http://api.geonames.org/neighboursJSON?&country=AR&username=angelarrr').respond(response);
+
+				getNeighbors().then(function(data){
+					$rootScope.digest();
+					$httpBackend.flush();
+					expect(data).toBe('an array of neighbors');
+				});
+			}));
+	});
 });

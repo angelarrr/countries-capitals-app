@@ -15,3 +15,32 @@ describe("/routes", function(){
 			expect($route.routes[null].redirectTo).toBe('/');
 		}));
 });
+
+// testing services
+describe("appFactory", function(){
+
+	beforeEach(module('cncApp'));
+
+	beforeEach(inject(function(_$httpBackend_) {
+		$httpBackend = _$httpBackend_;
+	}));
+
+	afterEach(function() {
+		$httpBackend.verifyNoOutstandingRequest();
+	});
+
+	describe('getCountry', function(){
+
+		it('should successfully request countries data',
+			inject(function($httpBackend, getCountry){
+				var response = 'an array of countries'
+				$httpBackend.expectGET('http://api.geonames.org/countryInfoJSON?username=angelarrr').respond(response);
+
+				getCountry().then(function(data){
+					$rootScope.digest();
+					$httpBackend.flush();
+					expect(data).toBe('an array of countries');
+				});
+			}));
+	});
+});

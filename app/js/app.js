@@ -28,7 +28,6 @@ app.run(function($rootScope, $location, $timeout) {
 app.config(['$routeProvider', function($routeProvider){
 	$routeProvider.when('/', {
 		templateUrl : './home/home.html',
-		controller: "",
 	}).when('/countries', {
 		templateUrl : './countries/countries.html',
 		controller : 'listCtrl',
